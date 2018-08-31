@@ -89,35 +89,33 @@ def tobs():
         tobs_list.append(tobs_dict)
     return jsonify(tobs_list)
 
-@app.route("/api/v1.0/start_date/<start>")
-def startdt(start):
-    """Return min,avg,max temperature for given year"""
-    # Query all stations
-    results = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).\
-    filter(Measurement.date >= start).all()
-
-    # Convert list of tuples into normal list
-    all_temps = list(np.ravel(results))
-    #canonicalized = Measurement.date
-    #if start <= Measurement.date:
-    return jsonify(all_temps)
-
-    #return jsonify({"error": f"Character with start_date {start} not found."}), 404
-
-@app.route("/api/v1.0/start_end_date/<start>/<end>")
-def startenddt(start,end):
-    """Return min,avg,max temperature for given year"""
-    # Query all stations
-    results = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).\
-    filter(Measurement.date >= start).\
-    filter(Measurement.date<=end).all()
-
-    # Convert list of tuples into normal list
-    all_temps = list(np.ravel(results))
-    #canonicalized = Measurement.date
-    #if start <= Measurement.date:
-    return jsonify(all_temps)
-
+@app.route("/api/v1.0/start_date/<start_date>")
+def start_date(start_date):
+    """Returns the Tmin, Tavg and Tmax for all dates greater than and equal to the start date"""
+    # Perform a query to retrieve the Tmin, Tavg and Tmax for all dates greater than and equal to the start date
+    dates=session.query(
+        func.min(Measurement.tobs),
+        func.max(Measurement.tobs),
+        func.avg(Measurement.tobs)
+    ).filter(Measurement.date==start_date).all()
+    
+    if None in dates[0]:
+        return jsonify({"error": f"Date: {start_date} not found."})
+    return jsonify(dates)
+    
+@app.route("/api/v1.0/start_end_date/<start_date>/<end_date>")
+def start_end_date(start_date,end_date):
+    """Returns the Tmin, Tavg and Tmax for all dates between start and end dates"""
+    # Perform a query to retrieve the Tmin, Tavg and Tmax for all dates between start and end dates
+    dates=session.query(
+        func.min(Measurement.tobs),
+        func.max(Measurement.tobs),
+        func.avg(Measurement.tobs)
+    ).filter(Measurement.date>=start_date).filter(Measurement.date<=end_date).all()
+    
+    if None in dates[0]:
+        return jsonify({"error": f"Dates not found."})
+    return jsonify(dates)
 
     
 
